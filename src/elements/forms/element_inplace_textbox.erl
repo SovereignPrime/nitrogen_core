@@ -55,8 +55,8 @@ render_element(Record) ->
             ]},
             #panel { id=EditPanelID, class="edit", body=[
                 #textbox { id=TextBoxID, text=Text, next=OKButtonID },
-                #button { id=OKButtonID, text="OK" },
-                #button { id=CancelButtonID, text="Cancel", click=[
+                #button { id=OKButtonID, class="btn btn-link", body="<i class='icon-ok'></i>" },
+                #button { id=CancelButtonID, class="btn btn-link", body="<i class='icon-remove'></i>", click=[
                     #hide{ target=EditPanelID },
                     #show{ target=ViewPanelID },
                     #script{ script=wf:f("obj('~s').value=obj('~s').defaultValue;",[TextBoxID, TextBoxID]) }
