@@ -133,7 +133,7 @@ NitrogenClass.prototype.$validate_and_serialize = function(validationGroup) {
         } else {
             // Skip any unchecked radio boxes.
             if ((this.type == "radio" || this.type=="checkbox") && !this.checked) return;
-            params[n.$make_id(this)] = this.value;
+            params[n.$make_id(this)] = $(this).val();
         }
     });
     // Return the params if valid. Otherwise, return null.
@@ -290,6 +290,19 @@ NitrogenClass.prototype.$send_pending_files = function(form,input) {
             file.submit();
         }
     }
+}
+
+NitrogenClass.prototype.$recalculate_upload_dimensions = function(form) {
+    // If the provided form is a string, let's get the object with objs() which
+    // does a little massaging.
+    if(typeof form == "string") {
+        form = objs(form);
+    }
+
+    var fakeinput = $(form).find(".upload-button");
+    var w = $(fakeinput).outerWidth(true);
+    var h = $(fakeinput).outerHeight(true);
+    $(form).find(".upload-content:visible").width(w).height(h);
 }
 
 NitrogenClass.prototype.$attach_upload_handle_dragdrop = function(form,input,settings) {
@@ -725,7 +738,6 @@ NitrogenClass.prototype.$droppable = function(path, dropOptions, dropPostbackInf
 }
 
 
-
 /*** SORTING ***/
 
 NitrogenClass.prototype.$sortitem = function(el, sortTag) {
@@ -748,6 +760,23 @@ NitrogenClass.prototype.$sortblock = function(el, sortOptions, sortPostbackInfo)
     objs(el).sortable(sortOptions);
 }
 
+/*** TEXTAREA TAB-TRAPPING ***/
+/*** With a little help from http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea ***/
+NitrogenClass.prototype.$trap_tabs = function(el) {
+    $(el).keydown(function(e) {
+        if(e.keyCode == 9) {
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            var $this = $(this);
+            var val = $this.val();
+            $this.val(val.substring(0, start) + "\t" + val.substring(end));
+            this.selectionStart = this.selectionEnd = start + 1;
+            return false;
+        }
+    });
+}
+
+/*** RECAPTCHA ***/
 /*** transfer content of an alien elment into a nitrogen form
  * used in src/elements/other/element_recaptcha.erl
  * ***/
