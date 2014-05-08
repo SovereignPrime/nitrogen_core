@@ -104,8 +104,8 @@ render_element(#inplace{
         ]},
         #panel { id=EditPanelID, class="edit", body=[
             Edit3,
-            #button { id=OKButtonID, text="OK", delegate=?MODULE, postback=OKPostback },
-            #button { id=CancelButtonID, text="Cancel", actions = [CancelEvent#event{ type=click }] }
+            #button { id=OKButtonID, class="btn btn-link", body="<i class='icon-ok'></i>", delegate=?MODULE, postback=OKPostback },
+            #button { id=CancelButtonID, class="btn btn-link", body="<i class='icon-remove'></i>", actions = [CancelEvent#event{ type=click }] }
         ]}
     ]}.
 
