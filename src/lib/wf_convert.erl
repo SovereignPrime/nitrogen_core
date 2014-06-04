@@ -119,8 +119,7 @@ ihe([$>|T], ET)                         -> "&gt;"    ++ ihe(T, ET);
 ihe([$"|T], ET)                         -> "&quot;"  ++ ihe(T, ET);
 ihe([$'|T], ET)                         -> "&#39;"   ++ ihe(T, ET);
 ihe([$&|T], ET)                         -> "&amp;"   ++ ihe(T, ET);
-ihe([$\s,$\s|T],whites)                 -> "&nbsp; " ++ ihe(T, whites);
-ihe([$\s|T],whites)                     -> "&nbsp;"  ++ ihe(T, whites);
+ihe([$\s,$\s|T],whites)                 -> " &nbsp;" ++ ihe(T, whites);
 ihe([$\t|T],whites)                     -> "&nbsp; &nbsp; &nbsp;" ++ ihe(T, whites);
 ihe([$\n|T],whites)                     -> "<br>"    ++ ihe(T,whites);
 ihe([BigNum|T], ET) when is_integer(BigNum)
@@ -131,13 +130,12 @@ ihe(<<"<", T/binary>>, ET)              -> <<"&lt;",   (ihe(T, ET))/binary>>;
 ihe(<<"\"",T/binary>>, ET)              -> <<"&quot;", (ihe(T, ET))/binary>>;
 ihe(<<"'", T/binary>>, ET)              -> <<"&#39;",  (ihe(T, ET))/binary>>;
 ihe(<<"&", T/binary>>, ET)              -> <<"&amp;",  (ihe(T, ET))/binary>>;
-ihe(<<"  ",T/binary>>, whites)          -> <<"&nbsp; ",(ihe(T,whites))/binary>>;
-ihe(<<" ", T/binary>>, whites)          -> <<"&nbsp;", (ihe(T,whites))/binary>>;
+ihe(<<"  ",T/binary>>, whites)          -> <<" &nbsp;",(ihe(T,whites))/binary>>;
 ihe(<<"\t",T/binary>>, whites)          -> <<"&nbsp; &nbsp; &nbsp;",(ihe(T,whites))/binary>>;
 ihe(<<"\n",T/binary>>, whites)          -> <<"<br>",   (ihe(T,whites))/binary>>;
 ihe(<<H:8, T/binary>>, ET)              -> <<H,(ihe(T,ET))/binary>>;
 ihe([H|T], ET)                          -> [ihe(H, ET)|ihe(T, ET)];
-ihe(U, _ET) when is_tuple(U); is_pid(U) -> throw({error, unsure_how_to_encode,U});
+ihe(U, ET) when is_tuple(U); is_pid(U)  -> ihe(io_lib:format("~p", [U]), ET);
 ihe(Other, _ET)                         -> Other.
 
 html_decode(B) when is_binary(B) -> html_decode(binary_to_list(B));
