@@ -125,8 +125,9 @@ render_element(Record = #upload{
             ]
         },
         #panel{
-            class=upload_progress,
-            body=""
+            class=["upload_progress", "progress"],
+            body=#panel{class=bar,
+                         style="width:0%;"}
         },
         #list{
             id=DropListingID,
