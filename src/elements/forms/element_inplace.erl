@@ -75,15 +75,7 @@ render_element(#inplace{
 	Edit2 = append_field_actions(EditAction, OKButtonID, EditModule:reflect(), Edit1),
 	Edit3 = replace_field_text(Text, Edit2, EditModule:reflect()),
 
-	% No value in view mode cause the view panel unclickable thus
-	% we set edit mode in that case.
-
-	StartMode1 = case string:strip(Text) of
-		[] -> edit;
-		_ -> StartMode
-	end,
-
-	case StartMode1 of
+	case StartMode of
 		view ->
 			wf:wire(EditPanelID, #hide{});
 		edit ->
@@ -115,20 +107,12 @@ event({ok, Delegate, {ViewPanelID, ViewID, EditPanelID, EditID}, Tag}) ->
 	Value = Module:inplace_event(Tag, string:strip(wf:q(EditID))),
 	wf:set(ViewID, Value),
 	wf:set(EditID, Value),
-	case Value =/= "" of
-			true ->
-				wf:wire(EditPanelID, #hide {}),
-				wf:wire(ViewPanelID, #show {});
-			false -> ok
-	end;
+    wf:wire(EditPanelID, #hide {}),
+    wf:wire(ViewPanelID, #show {});
 
-event({cancel, {ViewPanelID, _ViewID, EditPanelID, EditID}, _Tag}) ->
-	case string:strip(wf:q(EditID)) =/= "" of
-			true ->
-				wf:wire(EditPanelID, #hide {}),
-				wf:wire(ViewPanelID, #show {});
-			false -> ok
-	end.
+event({cancel, {ViewPanelID, _ViewID, EditPanelID, _EditID}, _Tag}) ->
+    wf:wire(EditPanelID, #hide {}),
+    wf:wire(ViewPanelID, #show {}).
 
 replace_field_text(Value, Element, Fields) ->
 	case element(1, Element) of
