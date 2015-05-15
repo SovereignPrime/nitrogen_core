@@ -146,6 +146,14 @@ render_element(Record = #upload{
         ]),
 
         wf_tags:emit_tag(input, [
+            {name, path},
+            {type, hidden},
+            {id, path},
+            {class, no_postback},
+            {value, ""}
+        ]),
+
+        wf_tags:emit_tag(input, [
             {name, pageContext},
             {type, hidden},
             {class, no_postback},
