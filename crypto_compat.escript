@@ -4,8 +4,9 @@
 main([]) ->
     crypto:start(),
 
-	Filename = "include/crypto_compat.hrl",
-	io:format("Generating crypto compatibility...\n"),
+    Path = filename:dirname(escript:script_name()),
+	Filename = Path ++ "/include/crypto_compat.hrl",
+	io:format("Generating crypto compatibility...~p\n", [Path]),
 	Encrypt = encrypt(),
 	Decrypt = decrypt(),
 	Hash = hash(),
