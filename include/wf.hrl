@@ -2,6 +2,7 @@
 -ifndef(wf_inc).
 -define(wf_inc, ok).
 -include("crypto_compat.hrl").
+-include("wf_test.hrl").
 
 
 %%% TYPES FOR DIALYZER %%%
@@ -39,7 +40,7 @@
 -type comet_name()          :: term().
 -type comet_restart_msg()   :: term().
 -type comet_function()      :: pid() | function() 
-                                | {comet_name(), function()} 
+                                | {comet_name(), function()}
                                 | {comet_name(), function(), comet_restart_msg()}.
 -type handler_config()      :: any().
 -type handler_state()       :: any().
@@ -49,15 +50,20 @@
                                 | grouped_vertical_bar | pie | pie3d.
 -type color()               :: string() | binary() | atom().
 -type google_chart_position()      :: top | left | bottom | right.
-
+-type module_function()     :: {atom(), atom()}.
+-type encoding_function()   :: module_function() | fun((iolist()) -> iolist()).
+-type encoding()            :: none | unicode | auto | encoding_function().
+-type context_type()        :: first_request | postback_request | static_file | postback_websocket.
 %%% CONTEXT %%%
 
 % Page Request Information.
 -record(page_context, {
     series_id,   % A unique ID assigned to the first request which stays constant on repeated requests.
     module,      % The requested page module
+    entry_point=main, % The entry point for the module. Either an atom name
+                      % (for Module:Atom/0) or can be a function arity 0
     path_info,   % Any extra info passed with the request
-    async_mode= comet % {poll, Interval} or comet
+    async_mode= comet % {poll, Interval}, comet, or {websocket, WebsocketConnectionPid}
 }).
 
 % Event Information. A serialized version of this record
@@ -77,26 +83,26 @@
 % to allow other frameworks to substitute their own behaviour.
 % These are set in wf_context:make_context/1
 -record(handler_context, {
-    name,    % The name of a handler. See wf_context for a list.
+    name,       % The name of a handler. See wf_context for a list.
     module,     % A module that provides the logic for a handler. This can be substituted by your app.
     config,     % The config of the handler, set at the beginning of each request.
     state       % The state of the handler, serialized and maintained between postbacks in a series.
+    %serialize=true % whether or not to serialize and deserialize this handler during requests. Usually, just the state handler needs to be serialized.
 }).
 
 -record(context, {
     % Transient Information
-    type,                % Either first_request, postback_request, or static_file
-    request_bridge,      % Holds the simple_bridge request object
-    response_bridge,     % Holds the simple_bridge response object
-    anchor=undefined,    % Holds the unique ID of the current anchor element.
-    data=[],             % Holds whatever the page_module:main/1 method returns: HTML, Elements, Binary, etc..
-    action_queue=undefined, %% Holds the reference to the action priority queue
-
+    type                    :: context_type(),
+    bridge                  :: simple_bridge:bridge(),
+    anchor=undefined        :: id(), 
+    data=[]                 :: iolist(),
+    encoding=auto           :: encoding(),
+    action_queue=undefined  :: wf_action_queue:action_queue() | undefined,
     % These are all serialized, sent to the browser
     % and de-serialized on each request.
-    page_context,
-    event_context,
-    handler_list
+    page_context            :: undefined | #page_context{},
+    event_context           :: undefined | #event_context{},
+    handler_list            :: undefined | list()
 }).
 
 %%% LOGGING %%%
@@ -275,6 +281,7 @@
         html_encode=true        :: html_encode(),
         next                    :: id(),
         click                   :: actions(),
+        enter_clicks=[]         :: [id()],
         postback                :: term(),
         disabled=false          :: boolean(),
         handle_invalid=false    :: boolean(),
@@ -396,6 +403,7 @@
 
 -record(checkbox, {?ELEMENT_BASE(element_checkbox),
         text=""                 :: text(),
+        label_position='after'  :: 'after' | before | none,
         html_encode=true        :: html_encode(),
         checked=false           :: boolean(),
         value="on"              :: text(),
@@ -493,6 +501,7 @@
     }).
 -record(table, {?ELEMENT_BASE(element_table),
         rows                    :: body(),
+        border = 0              :: integer(),
         header=[]               :: body(),
         footer=[]               :: body()
     }).
@@ -612,7 +621,8 @@
         button_text="Upload"    :: text(),
         droppable=false         :: boolean(),
         droppable_text="Drop Files Here" :: text(),
-        multiple=false          :: boolean()
+        multiple=false          :: boolean(),
+        overall_progress=auto   :: boolean() | undefined | auto
     }).
 -record(wizard, {?ELEMENT_BASE(element_wizard),
         tag                     :: term(),
@@ -706,37 +716,60 @@
         display_mode=reveal     :: reveal | overlay | push,
         body=[]                 :: body()
     }).
-
+-record(iframe, {?ELEMENT_BASE(element_iframe),
+        align                   :: text() | atom(),
+        frameborder             :: integer(),
+        height                  :: integer(),
+        name                    :: text(),
+        sandbox                 :: text(),
+        seamless                :: boolean(),
+        src                     :: url(),
+        srcdoc                  :: text(),
+        width                   :: integer(),
+        allowfullscreen         :: boolean()
+    }).
         
 %% HTML5 semantic elements
 -record(section, {?ELEMENT_BASE(element_section),
-        body=""                 :: body()
+        body=""                 :: body(),
+        role=""                 :: text()
     }).
 -record(nav, {?ELEMENT_BASE(element_nav),
-        body=""                 :: body()
+        body=""                 :: body(),
+        role=""                 :: text()
     }).
 -record(article, {?ELEMENT_BASE(element_article),
-        body=""                 :: body()
+        body=""                 :: body(),
+        role=""                 :: text()
     }).
 -record(aside, {?ELEMENT_BASE(element_aside),
-        body=""                 :: body()
+        body=""                 :: body(),
+        role=""                 :: text()
     }).
 -record(html5_header, {?ELEMENT_BASE(element_html5_header),
-        body=""                 :: body()
+        body=""                 :: body(),
+        role=""                 :: text()
     }).
 -record(html5_footer, {?ELEMENT_BASE(element_html5_footer),
-        body=""                 :: body()
+        body=""                 :: body(),
+        role=""                 :: text()
     }).
 -record(time, {?ELEMENT_BASE(element_time),
         datetime=""             :: text(),
         body=""                 :: body(),
         text=""                 :: text(),
-        html_encode=true        :: html_encode()
+        html_encode=true        :: html_encode(),
+        role=""                 :: text()
     }).
 -record(mark, {?ELEMENT_BASE(element_mark),
         body=""                 :: body(),
         text=""                 :: text(),
-        html_encode=true        :: html_encode()
+        html_encode=true        :: html_encode(),
+        role=""                 :: text()
+    }).
+-record(main, {?ELEMENT_BASE(element_main),
+        body=""                 :: body(),
+        role=""                 :: text()
     }).
 
 %% 960.gs Grid
@@ -774,18 +807,25 @@
 -record(grid_16,        ?GRID_ELEMENT(grid, 16)).
 -record(grid_clear,     ?GRID_ELEMENT(clear, undefined)).
 
+-record(progress_bar,   {?ELEMENT_BASE(element_progress_bar),
+        value=undefined         :: integer() | undefined,
+        max=100                 :: integer(),
+        color = <<"909090">>    :: color(),
+        label                   :: undefined | percent | ratio | both | string()
+    }).
+
 %% Google Charts
 -record(chart_axis, {
         position                :: google_chart_position(),
         labels                  :: undefined | [text()],
-        color=909090            :: color(),
+        color = <<"909090">>    :: color(),
         font_size=10            :: integer()
     }).
 
 -record(chart_data, {
         color                   :: color(),
         legend                  :: text(),
-        values                  :: [text()],
+        values                  :: [text() | integer()],
         min_value=0             :: integer(),
         max_value=100           :: integer(),
         line_width=1            :: integer(),
@@ -794,7 +834,7 @@
     }).
 -record(google_chart,   {?ELEMENT_BASE(element_google_chart),
         type=line               :: google_chart_type(),
-        color="909090"          :: color(),
+        color = <<"909090">>    :: color(),
         font_size=10            :: integer(),
         width=300               :: integer(),
         height=150              :: integer(),
@@ -810,7 +850,10 @@
         bar_space=3             :: integer(),
         bar_group_space=7       :: integer()
     }).
-
+-record(qr, {?ELEMENT_BASE(element_qr),
+        data=undefined          :: any(),
+        size=200                :: integer()
+    }).
 
 %%% Actions %%%
 -define(AV_BASE(Module,Type),
@@ -828,6 +871,7 @@
 
 -record(actionbase, {?ACTION_BASE(undefined)}).
 -record(wire, {?ACTION_BASE(action_wire)}).
+-record(click, {?ACTION_BASE(action_click)}).
 
 -define(ACTION_UPDATE(Type), {?ACTION_BASE(action_update),
         type=Type               :: atom(),
@@ -848,7 +892,8 @@
         pool=undefined          :: term(),
         scope=local             :: local | global,
         function                :: comet_function(),
-        dying_message           :: term()
+        dying_message           :: term(),
+        reconnect_actions       :: actions()
     }).
 -record(continue, {?ACTION_BASE(action_continue),
         function                :: undefined | fun(),
@@ -865,7 +910,10 @@
         function                :: fun() | undefined
     }).
 -record(set, {?ACTION_BASE(action_set),
-        value=""                :: text()
+        value=""                :: text() | integer()
+    }).
+-record(set_multiple, {?ACTION_BASE(action_set_multiple),
+        values=[]               :: [text()]
     }).
 -record(redirect, {?ACTION_BASE(action_redirect),
         url=""                  :: url()
@@ -881,6 +929,9 @@
         validation_group        :: string() | binary() | atom(),
         delegate                :: module(),
         extra_param             :: string() | binary() | undefined
+    }).
+-record(before_postback, {?ACTION_BASE(action_before_postback),
+        script=""               :: string()
     }).
 %% we want validation assignments to happen last, so we use AV_BASE and set deferral to zero first
 -record(validate, {?ACTION_BASE(action_validate),
@@ -908,7 +959,7 @@
         delegate                :: module()
     }).
 -record(console_log, {?ACTION_BASE(action_console_log),
-        text=""                 :: text()
+        text=""                 :: any()
     }).
 -record(script, {?ACTION_BASE(action_script),
         script                  :: text()
@@ -973,6 +1024,12 @@
 -record(enable, {?ACTION_BASE(action_enable)}).
 -record(make_readonly, {?ACTION_BASE(action_make_readonly)}).
 -record(make_writable, {?ACTION_BASE(action_make_writable)}).
+-record(set_cookie, {?ACTION_BASE(action_set_cookie),
+        cookie                  :: atom() | text(),
+        value=""                :: atom() | text(),
+        path="/"                :: text(),
+        minutes_to_live=20      :: integer()
+    }).
 
 %%% Validators %%%
 %%% %% TODO: Switch this from is_action to is_validator once deferred is implemented
@@ -982,7 +1039,9 @@
     attach_to                   :: undefined | id()
 ).
 -record(validatorbase, {?VALIDATOR_BASE(undefined)}).
--record(is_required, {?VALIDATOR_BASE(validator_is_required)}).
+-record(is_required, {?VALIDATOR_BASE(validator_is_required),
+        unless_has_value        :: undefined | [id()]
+    }).
 -record(is_email, {?VALIDATOR_BASE(validator_is_email)}).
 -record(is_integer, {?VALIDATOR_BASE(validator_is_integer),
         min                     :: undefined | integer(),
@@ -1005,8 +1064,9 @@
         tag                     :: term()
     }).
 -record(js_custom, {?VALIDATOR_BASE(validator_js_custom),
-        function                :: script(),
-        args="{}"               :: text()
+        function                :: atom() | script(),
+        args="{}"               :: text(),
+        when_empty=false        :: boolean()
     }).
 
 -endif.

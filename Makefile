@@ -1,7 +1,13 @@
+.PHONY: test docs doc
+
 all: compile
 
 compile:
 	./rebar compile
+
+dialyzer-deps-compile:
+	./rebar --config "rebar.dialyzer.config" get-deps
+	./rebar --config "rebar.dialyzer.config" compile
 
 clean:
 	./rebar clean
@@ -12,8 +18,18 @@ docs:
 
 doc: docs
 
-test: compile
+eunit: clean compile
 	./rebar eunit
+
+test:
+	mkdir -p test
+	rm -fr test/browsertest
+	$(MAKE) eunit
+	git clone git://github.com/nitrogen/NitrogenProject.com.git test/browsertest
+	mkdir -p test/browsertest/deps
+	ln -s ../../.. test/browsertest/deps/nitrogen_core
+	cd test/browsertest; make test_all TESTLOGDIR="../results.$(shell date +%Y-%m-%d.%H%M%S)"
+
 
 DEPS_PLT=$(CURDIR)/.deps_plt
 DEPS=erts kernel stdlib crypto sasl
@@ -22,12 +38,12 @@ DEPS=erts kernel stdlib crypto sasl
 $(DEPS_PLT):
 	@echo Building local plt at $(DEPS_PLT)
 	@echo 
-	@(dialyzer --output_plt $(DEPS_PLT) --build_plt --apps $(DEPS))
+	@(dialyzer --output_plt $(DEPS_PLT) --build_plt --apps $(DEPS) -r ./deps)
 
-dialyzer: compile $(DEPS_PLT)
+dialyzer: dialyzer-deps-compile $(DEPS_PLT)
 	@(dialyzer --fullpath --plt $(DEPS_PLT) -Wrace_conditions -r ./ebin)
 
-dialyzer-no-race: compile $(DEPS_PLT)
+dialyzer-no-race: dialyzer-deps-compile $(DEPS_PLT)
 	@(dialyzer --fullpath --plt $(DEPS_PLT) -r ./ebin)
 
 # TRAVIS-CI STUFF
@@ -36,7 +52,7 @@ ERLANG_VERSION_CHECK := erl -eval "io:format(\"~s\",[erlang:system_info(otp_rele
 ERLANG_VERSION = $(shell $(ERLANG_VERSION_CHECK))
 
 # This is primarily for Travis build testing, as each build instruction will overwrite the previous
-travis: test $(ERLANG_VERSION)
+travis: eunit $(ERLANG_VERSION)
 
 R15B: dialyzer
 R15B01: dialyzer

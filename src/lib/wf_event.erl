@@ -4,9 +4,11 @@
 % See MIT-LICENSE for licensing information.
 
 -module (wf_event).
--include_lib ("wf.hrl").
+-include("wf.hrl").
 -export ([
+    update_context_with_websocket_event/1,
     update_context_with_event/0,
+    update_context_with_event/1,
     generate_postback_script/7,
     generate_system_postback_script/5,
     serialize_event_context/5
@@ -19,11 +21,21 @@
 % If not found, then it creates #event_context and #page_context records with
 % values for a first request.
 
-
 update_context_with_event() ->
-    SerializedEvent = wf:q(eventContext),
-    Event = wf_pickle:depickle(SerializedEvent),
+    update_context_with_event(wf:q(eventContext)).
 
+update_context_with_websocket_event([]) ->
+    wf_context:type(postback_websocket),
+    ok;
+update_context_with_websocket_event(Data) ->
+    {_, SerializedEvent} = lists:keyfind(<<"eventContext">>, 1, Data),
+    update_context_with_event(SerializedEvent),
+    postback_request = wf_context:type(),
+    wf_context:type(postback_websocket),
+    ok.
+
+update_context_with_event(SerializedEvent) ->
+    Event = wf_pickle:depickle(SerializedEvent),
     % Update the Context...
     PageModule = wf_context:page_module(),
     IsPostback = is_record(Event, event_context),

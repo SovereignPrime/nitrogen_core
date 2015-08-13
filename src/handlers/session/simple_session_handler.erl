@@ -10,7 +10,7 @@
 % Someone please make it better! - Rusty
 
 -module (simple_session_handler).
--include_lib ("wf.hrl").
+-include("wf.hrl").
 -behaviour (session_handler).
 -export ([
     init/2, 
@@ -27,7 +27,8 @@ init(_Config, _State) ->
     Cookie = wf:cookie(get_cookie_name()),
     State = case wf:depickle(Cookie) of
         undefined -> new_state();
-        Other -> Other
+        Other=#state{} -> Other;
+        _ -> new_state()
     end,
     {ok, State}.
 
@@ -109,5 +110,5 @@ session_loop(Session, Timeout) ->
     end.
 
 new_state() ->
-    Unique = erlang:md5(term_to_binary({now(), erlang:make_ref()})),
+    Unique = erlang:md5(term_to_binary({os:timestamp(), erlang:make_ref()})),
     #state { unique=Unique }.

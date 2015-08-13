@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="title" content="Nitrogen 2.x Documentation"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2014-02-16 10:55:22 CST"/>
+<meta name="generated" content="2015-01-29 17:28:11 CST"/>
 <meta name="author" content="Rusty Klophaus (@rustyio)"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -95,7 +95,7 @@
 <div id="content">
 <h1 class="title">Nitrogen 2.x Documentation</h1>
 
-<p><a href="http://nitrogenproject.com">Home</a> | <a href="./index.html">Getting Started</a> | <b>API</b> | <a href="./elements.html">Elements</a> | <a href="./actions.html">Actions</a> | <a href="./validators.html">Validators</a> | <a href="./handlers.html">Handlers</a> | <a href="./config.html">Configuration Options</a> | <a href="./plugins.html">Plugins</a> | <a href="./jquery_mobile_integration.html">Mobile</a> | <a href="./troubleshooting.html">Troubleshooting</a> | <a href="./about.html">About</a>
+<p><a href="http://nitrogenproject.com">Home</a> | <a href="./index.html">Getting Started</a> | <b>API</b> | <a href="./elements.html">Elements</a> | <a href="./actions.html">Actions</a> | <a href="./validators.html">Validators</a> | <a href="./handlers.html">Handlers</a> | <a href="./config.html">Configuration Options</a> | <a href="./advanced.html">Advanced Guides</a> | <a href="./troubleshooting.html">Troubleshooting</a> | <a href="./about.html">About</a>
 </p>
 
 
@@ -460,8 +460,22 @@
 </div>
 
 <div id="outline-container-3-6" class="outline-3">
-<h3 id="sec-3-6"><span class="section-number-3"></span> wf:to_binary(Term) -&gt; Binary</h3>
+<h3 id="sec-3-6"><span class="section-number-3"></span> wf:to_existing_atom(Term) -&gt; Atom</h3>
 <div class="outline-text-3" id="text-3-6">
+
+
+<p>
+   Convert the supplied term to an Atom that already exists in the Erlang VM.
+   Same as <code>wf:to_atom/1</code> but safer when in doubt. (see
+   <a href="http://www.erlang.org/doc/efficiency_guide/advanced.html">the advanced section of the Erlang docs pertaining to atoms</a>).
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-7" class="outline-3">
+<h3 id="sec-3-7"><span class="section-number-3"></span> wf:to_binary(Term) -&gt; Binary</h3>
+<div class="outline-text-3" id="text-3-7">
 
 
 <p>
@@ -472,9 +486,9 @@
 
 </div>
 
-<div id="outline-container-3-7" class="outline-3">
-<h3 id="sec-3-7"><span class="section-number-3"></span> wf:to_integer(Term) -&gt; Integer</h3>
-<div class="outline-text-3" id="text-3-7">
+<div id="outline-container-3-8" class="outline-3">
+<h3 id="sec-3-8"><span class="section-number-3"></span> wf:to_integer(Term) -&gt; Integer</h3>
+<div class="outline-text-3" id="text-3-8">
 
 
 <p>
@@ -484,9 +498,9 @@
 
 </div>
 
-<div id="outline-container-3-8" class="outline-3">
-<h3 id="sec-3-8"><span class="section-number-3"></span> wf:html_encode(String) -&gt; EncodedString</h3>
-<div class="outline-text-3" id="text-3-8">
+<div id="outline-container-3-9" class="outline-3">
+<h3 id="sec-3-9"><span class="section-number-3"></span> wf:html_encode(String) -&gt; EncodedString</h3>
+<div class="outline-text-3" id="text-3-9">
 
 
 <p>
@@ -496,9 +510,9 @@
 
 </div>
 
-<div id="outline-container-3-9" class="outline-3">
-<h3 id="sec-3-9"><span class="section-number-3"></span> wf:html_decode(String) -&gt; DecodedString</h3>
-<div class="outline-text-3" id="text-3-9">
+<div id="outline-container-3-10" class="outline-3">
+<h3 id="sec-3-10"><span class="section-number-3"></span> wf:html_decode(String) -&gt; DecodedString</h3>
+<div class="outline-text-3" id="text-3-10">
 
 
 <p>
@@ -508,9 +522,9 @@
 
 </div>
 
-<div id="outline-container-3-10" class="outline-3">
-<h3 id="sec-3-10"><span class="section-number-3"></span> wf:url_encode(String) -&gt; EncodedString</h3>
-<div class="outline-text-3" id="text-3-10">
+<div id="outline-container-3-11" class="outline-3">
+<h3 id="sec-3-11"><span class="section-number-3"></span> wf:url_encode(String) -&gt; EncodedString</h3>
+<div class="outline-text-3" id="text-3-11">
 
 
 <p>
@@ -520,9 +534,9 @@
 
 </div>
 
-<div id="outline-container-3-11" class="outline-3">
-<h3 id="sec-3-11"><span class="section-number-3"></span> wf:url_decode(String) -&gt; DecodedString</h3>
-<div class="outline-text-3" id="text-3-11">
+<div id="outline-container-3-12" class="outline-3">
+<h3 id="sec-3-12"><span class="section-number-3"></span> wf:url_decode(String) -&gt; DecodedString</h3>
+<div class="outline-text-3" id="text-3-12">
 
 
 <p>
@@ -532,9 +546,21 @@
 
 </div>
 
-<div id="outline-container-3-12" class="outline-3">
-<h3 id="sec-3-12"><span class="section-number-3"></span> wf:hex_encode(String) -&gt; EncodedString.</h3>
-<div class="outline-text-3" id="text-3-12">
+<div id="outline-container-3-13" class="outline-3">
+<h3 id="sec-3-13"><span class="section-number-3"></span> wf:to_qs(PropList) -&gt; EncodedQueryString</h3>
+<div class="outline-text-3" id="text-3-13">
+
+
+<p>
+   Encode a PropList (a list of <code>{Key, Value}</code> tuples) into a URL-encoded query string (returned as an IOList).
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-14" class="outline-3">
+<h3 id="sec-3-14"><span class="section-number-3"></span> wf:hex_encode(String) -&gt; EncodedString.</h3>
+<div class="outline-text-3" id="text-3-14">
 
 
 <p>  
@@ -544,9 +570,9 @@
 
 </div>
 
-<div id="outline-container-3-13" class="outline-3">
-<h3 id="sec-3-13"><span class="section-number-3"></span> wf:hex_decode(String) -&gt; DecodedString</h3>
-<div class="outline-text-3" id="text-3-13">
+<div id="outline-container-3-15" class="outline-3">
+<h3 id="sec-3-15"><span class="section-number-3"></span> wf:hex_decode(String) -&gt; DecodedString</h3>
+<div class="outline-text-3" id="text-3-15">
 
 
 <p>
@@ -556,9 +582,9 @@
 
 </div>
 
-<div id="outline-container-3-14" class="outline-3">
-<h3 id="sec-3-14"><span class="section-number-3"></span> wf:temp_id() -&gt; String</h3>
-<div class="outline-text-3" id="text-3-14">
+<div id="outline-container-3-16" class="outline-3">
+<h3 id="sec-3-16"><span class="section-number-3"></span> wf:temp_id() -&gt; String</h3>
+<div class="outline-text-3" id="text-3-16">
 
 
 <p>
@@ -570,9 +596,9 @@
 
 </div>
 
-<div id="outline-container-3-15" class="outline-3">
-<h3 id="sec-3-15"><span class="section-number-3"></span> wf:js_escape(String) -&gt; EscapedString</h3>
-<div class="outline-text-3" id="text-3-15">
+<div id="outline-container-3-17" class="outline-3">
+<h3 id="sec-3-17"><span class="section-number-3"></span> wf:js_escape(String) -&gt; EscapedString</h3>
+<div class="outline-text-3" id="text-3-17">
 
 
 <p>
@@ -582,9 +608,33 @@
 
 </div>
 
-<div id="outline-container-3-16" class="outline-3">
-<h3 id="sec-3-16"><span class="section-number-3"></span> wf:join([Terms],Delimiter) -&gt; [Terms]</h3>
-<div class="outline-text-3" id="text-3-16">
+<div id="outline-container-3-18" class="outline-3">
+<h3 id="sec-3-18"><span class="section-number-3"></span> wf:json_encode(Data) -&gt; JsonEncodedString</h3>
+<div class="outline-text-3" id="text-3-18">
+
+
+<p>
+   Convert a data structure (Proplist, list, etc) to a JSON encoded string.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-19" class="outline-3">
+<h3 id="sec-3-19"><span class="section-number-3"></span> wf:json_decode(JsonEncodedString) -&gt;</h3>
+<div class="outline-text-3" id="text-3-19">
+
+
+<p>
+   Convert a JSON-encoded string back to an Erlang data structure.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-20" class="outline-3">
+<h3 id="sec-3-20"><span class="section-number-3"></span> wf:join([Terms],Delimiter) -&gt; [Terms]</h3>
+<div class="outline-text-3" id="text-3-20">
 
 
 <p>
@@ -1357,8 +1407,54 @@ Example:
 </div>
 
 <div id="outline-container-10-8" class="outline-3">
-<h3 id="sec-10-8"><span class="section-number-3"></span> wf:status_code(IntegerCode) -&gt; ok</h3>
+<h3 id="sec-10-8"><span class="section-number-3"></span> wf:encoding(Encoding) -&gt; ok</h3>
 <div class="outline-text-3" id="text-10-8">
+
+<p>   Set the encoding to be applied just before sending to the client.  Valid
+   values are:
+</p><dl>
+<dt>none</dt><dd>No encoding. Send the response as an iolist of bytes. This is what
+     you would want to use if you were returning binary data (like if you were
+     generating an image file on the fly).
+</dd>
+<dt>unicode</dt><dd>This runs the return value through Erlang's
+     <code>unicocde:characters_to_binary/1</code> before sending to the client.
+</dd>
+<dt>Function/1</dt><dd>Run the response through this particular function before
+     sending, such as if you have a custom encoding you wish to use.
+</dd>
+<dt>{Module, Function}</dt><dd>Run this through <code>Module:Function/1</code>. This is merely
+     an alternative to the previous option, but one that is configuration-file
+     friendly.
+</dd>
+<dt>auto (<b>Default</b>)</dt><dd>Reads the specified response header to attempt to
+     determine which encoding should be provided.  It's <b>quite</b> naive, however,
+     in the name of speed.  If the header starts with "text/" or is set to
+     "application/json" or "application/javascript", it will use <code>unicode</code>,
+     otherwise, it will use <code>none</code>.  For example, if your page you had set
+     <code>wf:content_type("image/png")</code>, it Encoding would apply as <code>none</code>.
+</dd>
+</dl>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-10-9" class="outline-3">
+<h3 id="sec-10-9"><span class="section-number-3"></span> wf:encoding() -&gt; Encoding</h3>
+<div class="outline-text-3" id="text-10-9">
+
+<p>   Return the current encoding that will be applied to the response. It's worth
+   noting that this will return <code>auto</code> if it's currently set to such.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10-10" class="outline-3">
+<h3 id="sec-10-10"><span class="section-number-3"></span> wf:status_code(IntegerCode) -&gt; ok</h3>
+<div class="outline-text-3" id="text-10-10">
 
 <p>   Set the HTTP response code. Default is 200.
 </p>
@@ -1366,9 +1462,9 @@ Example:
 
 </div>
 
-<div id="outline-container-10-9" class="outline-3">
-<h3 id="sec-10-9"><span class="section-number-3"></span> wf:content_type(ContentType) -&gt; ok</h3>
-<div class="outline-text-3" id="text-10-9">
+<div id="outline-container-10-11" class="outline-3">
+<h3 id="sec-10-11"><span class="section-number-3"></span> wf:content_type(ContentType) -&gt; ok</h3>
+<div class="outline-text-3" id="text-10-11">
 
 
 <p>
@@ -1380,48 +1476,92 @@ Example:
 
 </div>
 
-<div id="outline-container-10-10" class="outline-3">
-<h3 id="sec-10-10"><span class="section-number-3"></span> wf:uri() -&gt; String</h3>
-<div class="outline-text-3" id="text-10-10">
-
-
-<p>
-   Return the complete requested URI for the page.
-</p>
-</div>
-
-</div>
-
-<div id="outline-container-10-11" class="outline-3">
-<h3 id="sec-10-11"><span class="section-number-3"></span> wf:path() -&gt; String</h3>
-<div class="outline-text-3" id="text-10-11">
-
-
-<p>
-   Return the string of the requested path.
-</p>
-</div>
-
-</div>
-
 <div id="outline-container-10-12" class="outline-3">
-<h3 id="sec-10-12"><span class="section-number-3"></span> wf:path_info() -&gt; String</h3>
+<h3 id="sec-10-12"><span class="section-number-3"></span> wf:download_as(Filename) -&gt; ok</h3>
 <div class="outline-text-3" id="text-10-12">
 
 
 <p>
-   Return only the path info for the requested page module. In other words, if
-   the module web_my_page is requsted with the path
-   "/web/my/page/some/extra/stuff then <code>wf:path_info()</code> would return
-   "some/extra/stuff".
+   Set the HTTP Content-Disposition header in such a way that the browser will
+   treat the page as a download with the specified <code>Filename</code>.
 </p>
 </div>
 
 </div>
 
 <div id="outline-container-10-13" class="outline-3">
-<h3 id="sec-10-13"><span class="section-number-3"></span> wf:page_module() -&gt; Atom</h3>
+<h3 id="sec-10-13"><span class="section-number-3"></span> wf:request_method() -&gt; atom()</h3>
 <div class="outline-text-3" id="text-10-13">
+
+
+<p>
+   Return the HTTP request method used (<code>POST</code>, <code>GET</code>, <code>PUT</code>, etc), as a
+   lower-case atom (example: <code>post</code>, <code>get</code>, and <code>put</code>).
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10-14" class="outline-3">
+<h3 id="sec-10-14"><span class="section-number-3"></span> wf:url() -&gt; String</h3>
+<div class="outline-text-3" id="text-10-14">
+
+
+<p>
+   Return the complete requested URL for the page. For exaple, if the request
+   is for <code>http://myapp.com/some/file?some_qs</code>, the return is
+   ="<a href="http://myapp.com/some/file?some_qs">http://myapp.com/some/file?some_qs</a>".
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10-15" class="outline-3">
+<h3 id="sec-10-15"><span class="section-number-3"></span> wf:uri() -&gt; String</h3>
+<div class="outline-text-3" id="text-10-15">
+
+
+<p>
+   Return the complete requested URI for the page. Note, this does not include
+   the protocol (http/https) or the hostname. For example, if the request is for
+   <code>http://myapp.com/some/file?some_qs</code>, the return is ="/some/file?some<sub>qs</sub>"=).
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10-16" class="outline-3">
+<h3 id="sec-10-16"><span class="section-number-3"></span> wf:path() -&gt; String</h3>
+<div class="outline-text-3" id="text-10-16">
+
+
+<p>
+   Return the string of the requested path.  This excludes any query<sub>string</sub>
+   information. For example, if the request is for
+   <code>http://myapp.com/some/file?some_qs</code> the return value is ="/some/file"=
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10-17" class="outline-3">
+<h3 id="sec-10-17"><span class="section-number-3"></span> wf:path_info() -&gt; String</h3>
+<div class="outline-text-3" id="text-10-17">
+
+
+<p>
+   Return only the path info for the requested page module. In other words, if
+   the module web_my_page is requsted with the path
+   ="/web/my/page/some/extra/stuff= then <code>wf:path_info()</code> would return
+   ="some/extra/stuff"=.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10-18" class="outline-3">
+<h3 id="sec-10-18"><span class="section-number-3"></span> wf:page_module() -&gt; Atom</h3>
+<div class="outline-text-3" id="text-10-18">
 
 
 <p>
@@ -1432,9 +1572,24 @@ Example:
 
 </div>
 
-<div id="outline-container-10-14" class="outline-3">
-<h3 id="sec-10-14"><span class="section-number-3"></span> wf:peer_ip() -&gt; IPAddress (4-tuple or 8-tuple)</h3>
-<div class="outline-text-3" id="text-10-14">
+<div id="outline-container-10-19" class="outline-3">
+<h3 id="sec-10-19"><span class="section-number-3"></span> wf:protocol() -&gt; http | https</h3>
+<div class="outline-text-3" id="text-10-19">
+
+
+<p>
+   Return whether the request to the server is made by HTTP or HTTPS. Note,
+   that if the request is made behind a proxy, this will only return whether
+   the request from the proxy to the server is in HTTP or HTTPS, so the
+   protocol seen by Nitrogen might not be the same protocol used by the client.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-10-20" class="outline-3">
+<h3 id="sec-10-20"><span class="section-number-3"></span> wf:peer_ip() -&gt; IPAddress (4-tuple or 8-tuple)</h3>
+<div class="outline-text-3" id="text-10-20">
 
 
 
@@ -1447,9 +1602,9 @@ Example:
 
 </div>
 
-<div id="outline-container-10-15" class="outline-3">
-<h3 id="sec-10-15"><span class="section-number-3"></span> wf:peer_ip(ListOfProxies) -&gt; IPAddress (4-tuple or 8-tuple)</h3>
-<div class="outline-text-3" id="text-10-15">
+<div id="outline-container-10-21" class="outline-3">
+<h3 id="sec-10-21"><span class="section-number-3"></span> wf:peer_ip(ListOfProxies) -&gt; IPAddress (4-tuple or 8-tuple)</h3>
+<div class="outline-text-3" id="text-10-21">
 
 
 <p>
@@ -1459,9 +1614,9 @@ Example:
 
 </div>
 
-<div id="outline-container-10-16" class="outline-3">
-<h3 id="sec-10-16"><span class="section-number-3"></span> wf:peer_ip(ListOfProxies, ForwardedHeader) -&gt; IPAddress (4-tuple or 8-tuple)</h3>
-<div class="outline-text-3" id="text-10-16">
+<div id="outline-container-10-22" class="outline-3">
+<h3 id="sec-10-22"><span class="section-number-3"></span> wf:peer_ip(ListOfProxies, ForwardedHeader) -&gt; IPAddress (4-tuple or 8-tuple)</h3>
+<div class="outline-text-3" id="text-10-22">
 
 
 <p>
@@ -1788,7 +1943,7 @@ Example:
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2014-02-16 10:55:22 CST</p>
+<p class="date">Date: 2015-01-29 17:28:11 CST</p>
 <p class="author">Author: Rusty Klophaus (@rustyio)</p>
 <p class="creator">Org version 7.8.02 with Emacs version 23</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>

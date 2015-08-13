@@ -4,7 +4,7 @@
 % See MIT-LICENSE for licensing information.
 
 -module (wf_utils).
--include_lib ("wf.hrl").
+-include("wf.hrl").
 -export ([
     f/1, f/2,
     guid/0, short_guid/0,
@@ -18,7 +18,8 @@
     replace_field/4,
     get_field/3,
     copy_fields/2,
-    is_iolist_empty/1
+    is_iolist_empty/1,
+    has_behaviour/2
 ]).
 
 -define(COPY_TO_BASERECORD(Name, Size, Record),
@@ -28,16 +29,16 @@
 
 f(S) -> f(S, []).
 f(S, Args) when is_binary(S) ->
-	iolist_to_binary(io_lib:format(S, Args));
+	wf:to_unicode_binary(io_lib:format(S, Args));
 f(S, Args) when is_list(S) ->
-	lists:flatten(io_lib:format(S,Args)).
+    wf:to_unicode_list(lists:flatten(io_lib:format(S,Args))).
 
 
 %%% IDS %%%
 
 % guid/0 - Return a guid like object.
 guid() ->
-    MD5 = erlang:md5(term_to_binary({node(), now(), make_ref()})),
+    MD5 = erlang:md5(term_to_binary({node(), os:timestamp(), make_ref()})),
     MD5List = lists:nthtail(8, binary_to_list(MD5)),
     F = fun(N) -> wf:f("~2.16.0B", [N]) end,
     L = [F(N) || N <- MD5List],
@@ -45,7 +46,7 @@ guid() ->
 
 % short_guid/0 - Return a shorter guid like object.
 short_guid() ->
-    MD5 = erlang:md5(term_to_binary({node(), now(), make_ref()})),
+    MD5 = erlang:md5(term_to_binary({node(), os:timestamp(), make_ref()})),
     MD5List = lists:nthtail(14, binary_to_list(MD5)),
     F = fun(N) -> wf:f("~2.16.0B", [N]) end,
     L = [F(N) || N <- MD5List],
@@ -207,3 +208,14 @@ get_field(Key, Fields, Rec) ->
 		undefined -> undefined;
 		N -> element(N, Rec)
 	end.
+
+%% HAS BEHAVIOUR
+
+has_behaviour(Module, Behaviour) ->
+    try
+        Attributes = Module:module_info(attributes),
+        {behaviour, Behaviours} = lists:keyfind(behaviour, 1, Attributes),
+        lists:member(Behaviour, Behaviours)
+    catch
+        _:_ -> false
+    end.

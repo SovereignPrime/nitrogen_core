@@ -37,12 +37,22 @@
 -spec reflect() -> [atom()].
 reflect() -> record_info(fields, upload).
 
+-spec overall_progress(OverallProgress :: boolean() | undefined | auto,
+                       Multiple :: boolean()) -> boolean().
+overall_progress(OverallProgress, _Multiple) when is_boolean(OverallProgress) ->
+    OverallProgress;
+overall_progress(undefined, Multiple) ->
+    Multiple;
+overall_progress(auto, Multiple) ->
+    Multiple.
+
 -spec render_element(#upload{}) -> body().
 render_element(Record = #upload{
         id=ID,
         class=Class,
         anchor=Anchor,
         multiple=Multiple,
+        overall_progress=OverallProgress0,
         droppable=Droppable,
         droppable_text=DroppableText,
         file_text=FileInputText,
@@ -61,7 +71,9 @@ render_element(Record = #upload{
 
 	Param = [
 		{droppable,Droppable},
-		{autoupload,not(ShowButton)}
+		{autoupload,not(ShowButton)},
+        {multiple, Multiple},
+        {overall_progress, overall_progress(OverallProgress0, Multiple)}
 	],
 
 	JSONParam = nitro_mochijson2:encode({struct,Param}),
@@ -185,7 +197,7 @@ event({upload_started, Record}) ->
 % is trigger a postback that happens inside of Nitrogen. 
 event({upload_finished, Record}) ->
     wf_context:type(first_request),
-    Req = wf_context:request_bridge(),
+    Req = wf_context:bridge(),
 
     % % Create the postback...
     {Filename,NewTag} = case Req:post_files() of

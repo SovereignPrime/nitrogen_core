@@ -4,9 +4,13 @@
 % See MIT-LICENSE for licensing information.
 
 -module (action_jquery_effect).
--include_lib ("wf.hrl").
--compile(export_all).
+-include("wf.hrl").
+-export([
+    render_action/1,
+    options_to_js/1
+]).
 
+-spec render_action(#jquery_effect{}) -> body().
 render_action(Record) ->
     Target = Record#jquery_effect.target,
     Effect = Record#jquery_effect.effect,
@@ -25,12 +29,12 @@ render_action(Record) ->
         'show' when Effect==none -> ["show(", Actions, ");"];
         'hide' when Effect==none -> ["hide(", Actions, ");"];
         'toggle' when Effect==none -> ["toggle(", Actions, ");"];
-        'appear' -> [wf:f("fadeIn(~p, ", [Speed]), Actions, ");"];
-        'fade'   -> [wf:f("fadeOut(~p, ", [Speed]), Actions, ");"];
-        'slideup'-> [wf:f("slideUp(~p, ",[Speed]), Actions, ");"];
-        'slidedown'    -> [wf:f("slideDown(~p, ",[Speed]), Actions, ");"];
-        'show'   -> [wf:f("show('~s', ~s, ~p, ", [Effect, Options, Speed]), Actions, ");"];
-        'hide'   -> [wf:f("hide('~s', ~s, ~p, ", [Effect, Options, Speed]), Actions, ");"];
+        'appear' -> [wf:f("hide().fadeIn(~p, ", [Speed]), Actions, ");"];
+        'fade'   -> [wf:f("show().fadeOut(~p, ", [Speed]), Actions, ");"];
+        'slideup'-> [wf:f("show().slideUp(~p, ",[Speed]), Actions, ");"];
+        'slidedown' -> [wf:f("hide().slideDown(~p, ",[Speed]), Actions, ");"];
+        'show'   -> [wf:f("hide().show('~s', ~s, ~p, ", [Effect, Options, Speed]), Actions, ");"];
+        'hide'   -> [wf:f("show().hide('~s', ~s, ~p, ", [Effect, Options, Speed]), Actions, ");"];
         'effect' -> [wf:f("effect('~s', ~s, ~p, ", [Effect, Options, Speed]), Actions, ");"];
         'toggle' -> [wf:f("toggle('~s', ~s, ~p, ", [Effect, Options, Speed]), Actions, ");"];
         'add_class'    -> [wf:f("addClass('~s', ~p, ", [Class, Speed]), Actions, ");"];
@@ -39,24 +43,21 @@ render_action(Record) ->
     end,
     [wf:f("objs('~s').", [Target]), Script].
 
-
-%% Options is a list of {Key,Value} tuples	
+-spec options_to_js(Options :: proplist()) -> binary().
 options_to_js(Options) ->
     F = fun({Key, Value}) ->
         if 
-            is_list(Value) -> 
-                wf:f("~s: '~s'", [Key, wf:js_escape(Value)]);
-            is_atom(Value) andalso (Value == true orelse Value == false) ->
-                wf:f("~s: ~s", [Key, Value]);
-            is_atom(Value) ->
-                wf:f("~s: '~s'", [Key, Value]);
+            Value =:= true; Value =:= false ->
+                wf:f(<<"~s: ~ts">>, [Key, Value]);
+            is_list(Value); is_binary(Value); is_atom(Value) ->
+                wf:f(<<"~s: '~ts'">>, [Key, wf:js_escape(Value)]);
             true -> 
-                wf:f("~s: ~p", [Key, Value])
+                wf:f(<<"~s: ~p">>, [Key, Value])
         end
     end,
     Options1 = [F(X) || X <- Options],
-    Options2 = string:join(Options1, ","),
-    wf:f("{ ~s }", [Options2]).
+    Options2 = wf:join(Options1, <<",">>),
+    wf:f(<<"{ ~s }">>, [Options2]).
 
 
 

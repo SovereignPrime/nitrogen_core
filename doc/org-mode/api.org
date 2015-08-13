@@ -6,7 +6,7 @@
 #+OPTIONS:   H:2 num:1 toc:1 \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+EMAIL:
 
-#+TEXT: [[http://nitrogenproject.com][Home]] | [[file:./index.org][Getting Started]] | *API* | [[file:./elements.org][Elements]] | [[file:./actions.org][Actions]] | [[file:./validators.org][Validators]] | [[file:./handlers.org][Handlers]] | [[file:./config.org][Configuration Options]] | [[file:./plugins.org][Plugins]] | [[file:./jquery_mobile_integration.org][Mobile]] | [[file:./troubleshooting.org][Troubleshooting]] | [[file:./about.org][About]]
+#+TEXT: [[http://nitrogenproject.com][Home]] | [[file:./index.org][Getting Started]] | *API* | [[file:./elements.org][Elements]] | [[file:./actions.org][Actions]] | [[file:./validators.org][Validators]] | [[file:./handlers.org][Handlers]] | [[file:./config.org][Configuration Options]] | [[file:./advanced.org][Advanced Guides]] | [[file:./troubleshooting.org][Troubleshooting]] | [[file:./about.org][About]]
 #+HTML: <div class=headline>Nitrogen API</div>
 
 * Index
@@ -117,6 +117,12 @@
    Convert the supplied term into an Atom, if possible. Useful for
    turning Integers, Binaries, and Strings into Atoms.
 
+** wf:to\_existing\_atom(Term) -> Atom
+
+   Convert the supplied term to an Atom that already exists in the Erlang VM.
+   Same as =wf:to_atom/1= but safer when in doubt. (see
+   [[http://www.erlang.org/doc/efficiency_guide/advanced.html][the advanced section of the Erlang docs pertaining to atoms]]).
+
 ** wf:to\_binary(Term) -> Binary
 
    Convert the supplied term into a Binary, if possible. Useful for
@@ -142,6 +148,10 @@
 
    URL decode the supplied String, converting a percent-encoded String into a normal String.
 
+** wf:to\_qs(PropList) -> EncodedQueryString
+
+   Encode a PropList (a list of ={Key, Value}= tuples) into a URL-encoded query string (returned as an IOList).
+
 ** wf:hex\_encode(String) -> EncodedString.
   
    Hex-encode the supplied String.
@@ -159,6 +169,14 @@
 ** wf:js\_escape(String) -> EscapedString
 
    Convert a String to a JS-safe string by adding backslashes to quotes and newlines.
+
+** wf:json\_encode(Data) -> JsonEncodedString
+
+   Convert a data structure (Proplist, list, etc) to a JSON encoded string.
+
+** wf:json\_decode(JsonEncodedString) ->
+
+   Convert a JSON-encoded string back to an Erlang data structure.
 
 ** wf:join([Terms],Delimiter) -> [Terms]
 
@@ -412,7 +430,7 @@
 
 Example:
 #+BEGIN_SRC erlang
-  wf:qs_pl([favorite_robot,favorite_dinosaur,favorite_hobbit])
+  wf:q_pl([favorite_robot,favorite_dinosaur,favorite_hobbit])
 #+END_SRC
 
   Returns something like:
@@ -470,6 +488,30 @@ Example:
    this during the page's initial request will be different than calling it within
    a postback event.
 
+** wf:encoding(Encoding) -> ok
+   Set the encoding to be applied just before sending to the client.  Valid
+   values are:
+   + none :: No encoding. Send the response as an iolist of bytes. This is what
+     you would want to use if you were returning binary data (like if you were
+     generating an image file on the fly).
+   + unicode :: This runs the return value through Erlang's
+     =unicocde:characters_to_binary/1= before sending to the client.
+   + Function/1 :: Run the response through this particular function before
+     sending, such as if you have a custom encoding you wish to use.
+   + {Module, Function} :: Run this through =Module:Function/1=. This is merely
+     an alternative to the previous option, but one that is configuration-file
+     friendly.
+   + auto (*Default*) :: Reads the specified response header to attempt to
+     determine which encoding should be provided.  It's *quite* naive, however,
+     in the name of speed.  If the header starts with "text/" or is set to
+     "application/json" or "application/javascript", it will use =unicode=,
+     otherwise, it will use =none=.  For example, if your page you had set
+     =wf:content_type("image/png")=, it Encoding would apply as =none=.
+
+** wf:encoding() -> Encoding
+   Return the current encoding that will be applied to the response. It's worth
+   noting that this will return =auto= if it's currently set to such.
+
 ** wf:status\_code(IntegerCode) -> ok
    Set the HTTP response code. Default is 200.
    
@@ -479,25 +521,52 @@ Example:
    used to return text images or other files to the browser, rather than returning 
    HTML.
 
+** wf:download\_as(Filename) -> ok
+
+   Set the HTTP Content-Disposition header in such a way that the browser will
+   treat the page as a download with the specified =Filename=.
+
+** wf:request\_method() -> atom()
+
+   Return the HTTP request method used (=POST=, =GET=, =PUT=, etc), as a
+   lower-case atom (example: =post=, =get=, and =put=).
+
+** wf:url() -> String
+
+   Return the complete requested URL for the page. For exaple, if the request
+   is for =http://myapp.com/some/file?some_qs=, the return is
+   ="http://myapp.com/some/file?some_qs".
+
 ** wf:uri() -> String
 
-   Return the complete requested URI for the page.
+   Return the complete requested URI for the page. Note, this does not include
+   the protocol (http/https) or the hostname. For example, if the request is for
+   =http://myapp.com/some/file?some_qs=, the return is ="/some/file?some_qs"=).
 
 ** wf:path() -> String
 
-   Return the string of the requested path.
+   Return the string of the requested path.  This excludes any query_string
+   information. For example, if the request is for
+   =http://myapp.com/some/file?some_qs= the return value is ="/some/file"=
 
 ** wf:path\_info() -> String
 
    Return only the path info for the requested page module. In other words, if
    the module web\_my\_page is requsted with the path
-   "/web/my/page/some/extra/stuff then =wf:path_info()= would return
-   "some/extra/stuff".
+   ="/web/my/page/some/extra/stuff= then =wf:path_info()= would return
+   ="some/extra/stuff"=.
    
 ** wf:page\_module() -> Atom
 
    Return the requested page module. Useful information to know when writing a
    custom element or action.
+
+** wf:protocol() -> http | https
+
+   Return whether the request to the server is made by HTTP or HTTPS. Note,
+   that if the request is made behind a proxy, this will only return whether
+   the request from the proxy to the server is in HTTP or HTTPS, so the
+   protocol seen by Nitrogen might not be the same protocol used by the client.
 
 ** wf:peer\_ip() -> IPAddress (4-tuple or 8-tuple)
 
@@ -564,7 +633,7 @@ Example:
 ** wf:header(StringKey, HeaderValue) -> ok
 
    Set an HTTP header during the next response.
-   
+
 * Serialization
 # <<12>>
    

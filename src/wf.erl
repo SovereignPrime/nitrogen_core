@@ -4,7 +4,7 @@
 % See MIT-LICENSE for licensing information.
 
 -module (wf).
--include_lib ("wf.hrl").
+-include("wf.hrl").
 -compile (export_all).
 
 %%% EXPOSE WIRE, UPDATE, FLASH %%%
@@ -55,6 +55,13 @@ set(Element, Value) ->
 
 set(Priority, Element, Value) when ?IS_ACTION_PRIORITY(Priority) -> 
     ok = action_set:set(Priority, Element, Value).
+
+set_multiple(Element, Values) ->
+    ok = set_multiple(normal, Element, Values).
+
+set_multiple(Priority, Element, Values) when is_list(Values), ?IS_ACTION_PRIORITY(Priority) ->
+    ok = action_set_multiple:set(Priority, Element, Values).
+      
 
 update(Target, Elements) -> 
     ok = update(normal, Target, Elements).
@@ -156,11 +163,20 @@ depickle(SerializedData, TTLSeconds) ->
 to_list(T) -> 
     _String = wf_convert:to_list(T).
 
+to_unicode_list(T) ->
+    _String = wf_convert:to_unicode_list(T).
+
 to_atom(T) -> 
     _Atom = wf_convert:to_atom(T).
 
+to_existing_atom(T) ->
+    _Atom = wf_convert:to_existing_atom(T).
+
 to_binary(T) -> 
     _Binary = wf_convert:to_binary(T).
+
+to_unicode_binary(T) ->
+    _Binary = wf_convert:to_unicode_binary(T).
 
 to_integer(T) -> 
     _Integer = wf_convert:to_integer(T).
@@ -194,6 +210,18 @@ hex_decode(S) ->
 
 js_escape(String) -> 
     _String = wf_convert:js_escape(String).
+
+json_encode(Data) ->
+    _String = wf_convert:json_encode(Data).
+
+json_decode(Json) ->
+    _Data = wf_convert:json_decode(Json).
+
+to_qs(List) ->
+    _Iolist = wf_convert:to_qs(List).
+
+parse_qs(String) ->
+    _Proplist = wf_convert:parse_qs(String).
 
 join(List,Delimiter) ->
     _Result = wf_convert:join(List,Delimiter).
@@ -234,6 +262,9 @@ path_info() ->
 uri() ->
     wf_context:uri().
 
+url() ->
+    wf_context:url().
+
 status_code() -> 
     ok = wf_context:status_code().
 
@@ -242,6 +273,15 @@ status_code(StatusCode) ->
 
 content_type(ContentType) ->
     ok = wf_context:content_type(ContentType).
+
+encoding() ->
+    wf_context:encoding().
+
+encoding(Encoding) ->
+    wf_context:encoding(Encoding).
+
+download_as(Filename) ->
+    wf_context:download_as(Filename).
 
 headers() -> 
     wf_context:headers().
@@ -253,22 +293,22 @@ header(Header, Value) ->
     ok = wf_context:header(Header, Value).
 
 cookies() ->
-    wf_context:cookies().
+    wf_cookies:cookies().
 
 cookie(Cookie) ->
-    wf_context:cookie(Cookie).
+    wf_cookies:get_cookie(Cookie).
 
 cookie_default(Cookie,DefaultValue) ->
-    wf_context:cookie_default(Cookie,DefaultValue).
+    wf_cookies:get_cookie(Cookie,DefaultValue).
 
 cookie(Cookie, Value) ->
-    ok = wf_context:cookie(Cookie, Value).
+    ok = wf_cookies:set_cookie(Cookie, Value).
 
 cookie(Cookie, Value, Path, MinutesToLive) ->
-    ok = wf_context:cookie(Cookie, Value, Path, MinutesToLive).
+    ok = wf_cookies:set_cookie(Cookie, Value, Path, MinutesToLive).
 
 delete_cookie(Cookie) ->
-    ok = wf_context:delete_cookie(Cookie).
+    ok = wf_cookies:delete_cookie(Cookie).
 
 socket() ->
     wf_context:socket().
@@ -281,6 +321,9 @@ peer_ip(Proxies) ->
 
 peer_ip(Proxies,ForwardedHeader) ->
     wf_context:peer_ip(Proxies,ForwardedHeader).
+
+request_method() ->
+    wf_context:request_method().
 
 request_body() ->
     wf_context:request_body().
